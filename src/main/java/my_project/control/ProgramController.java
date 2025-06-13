@@ -1,52 +1,87 @@
 package my_project.control;
 
 import KAGO_framework.control.ViewController;
-import my_project.model.House;
+import KAGO_framework.control.SoundController;
+import my_project.model.Player;
 
-/**
- * Ein Objekt der Klasse ProgramController dient dazu das Programm zu steuern.
- * Hinweise:
- * - Der Konstruktor sollte nicht geändert werden.
- * - Sowohl die startProgram()- als auch die updateProgram(...)-Methoden müssen vorhanden sein und ihre Signatur sollte
- *   nicht geändert werden
- * - Zusätzliche Methoden sind natürlich gar kein Problem
- */
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.io.File;
+
 public class ProgramController {
 
-    //Attribute
+    private boolean gameStarted = false;
+    private boolean gameOver = false;
 
+    private Player player;
+    private EnemyManager enemyManager;
+    private PowerUpManager powerUpManager;
 
-    // Referenzen
-    private final ViewController viewController;  // diese Referenz soll auf ein Objekt der Klasse viewController zeigen. Über dieses Objekt wird das Fenster gesteuert.
-    private House firstHouse; // deklariert eine Referenz für ein Objekt der Klasse House
+    private Image background;
+    private Font font;
 
-    /**
-     * Konstruktor
-     * Dieser legt das Objekt der Klasse ProgramController an, das den Programmfluss steuert.
-     * Damit der ProgramController auf das Fenster zugreifen kann, benötigt er eine Referenz auf das Objekt
-     * der Klasse viewController. Diese wird als Parameter übergeben.
-     * @param viewController das viewController-Objekt des Programms
-     */
-    public ProgramController(ViewController viewController){
-        this.viewController = viewController;
+    public void start() {
+        ViewController viewController = ViewController.getInstance();
+
+        background = Toolkit.getDefaultToolkit().getImage("src/main/resources/graphic/hintergrund.jpeg");
+
+        try {
+            font = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/font/Kanit-SemiBold.ttf")).deriveFont(60f);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(font);
+        } catch (Exception e) {
+            e.printStackTrace();
+            font = new Font("SansSerif", Font.BOLD, 60); // Fallback
+        }
+
+        player = new Player(200, 200);
+        enemyManager = new EnemyManager(player);
+        powerUpManager = new PowerUpManager(player);
+
+        viewController.register(player);
+        SoundController.getInstance().playSound("src/main/resources/sound/startSound.mp3", false);
     }
 
-    /**
-     * Diese Methode wird genau ein mal nach Programmstart aufgerufen. Hier sollte also alles geregelt werden,
-     * was zu diesem Zeipunkt passieren muss.
-     */
-    public void startProgram() {
-        // Erstelle ein Objekt der Klasse House und initialisiere damit die Referenz house1
-        firstHouse = new House();
-        // Teile dem ViewController-Objekt mit, dass das House-Objekt gezeichnet werden soll
-        viewController.draw(firstHouse);
+    public void updateProgramLogic(double dt) {
+        if (!gameStarted && ViewController.getInstance().getKeyStates()[KeyEvent.VK_SPACE]) {
+            startGame();
+        }
+
+        if (gameStarted && !gameOver) {
+            player.update(dt);
+            enemyManager.update(dt);
+            powerUpManager.update(dt);
+
+            if (player.getLeben() <= 0) {
+                gameOver = true;
+                SoundController.getInstance().stopAllSounds();
+                SoundController.getInstance().playSound("src/main/resources/sound/gameOverSound.mp3", false);
+            }
+        }
     }
 
-    /**
-     * Diese Methode wird vom ViewController-Objekt automatisch mit jedem Frame aufgerufen (ca. 60mal pro Sekunde)
-     * @param dt Zeit seit letztem Frame in Sekunden
-     */
-    public void updateProgram(double dt){
+    public void draw(Graphics g) {
+        g.drawImage(background, 0, 0, null);
+        g.setFont(font);
 
+        if (!gameStarted) {
+            g.setColor(Color.RED);
+            g.drawString("START THE GAME", 300, 400);
+        } else if (gameOver) {
+            g.setColor(Color.RED);
+            g.drawString("GAME OVER", 350, 400);
+        } else {
+            g.setColor(Color.WHITE);
+            g.drawString("Leben: " + player.getLeben(), 30, 60);
+            g.drawString("Score: " + player.getScore(), 30, 120);
+
+            enemyManager.draw(g);
+            powerUpManager.draw(g);
+        }
+    }
+
+    private void startGame() {
+        gameStarted = true;
+        SoundController.getInstance().playSound("src/main/resources/sound/gameSound.mp3", true);
     }
 }
