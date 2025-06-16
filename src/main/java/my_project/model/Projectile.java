@@ -1,9 +1,9 @@
+// Projectile.java
 package my_project.model;
 
 import KAGO_framework.model.GraphicalObject;
 
 public class Projectile extends GraphicalObject {
-
     private double speed = 500;
 
     public Projectile(double x, double y) {

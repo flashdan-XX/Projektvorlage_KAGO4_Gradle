@@ -1,10 +1,10 @@
+// PowerUp.java
 package my_project.model;
 
 import KAGO_framework.model.GraphicalObject;
 import java.awt.*;
 
 public class PowerUp extends GraphicalObject {
-
     private int type;
     private Color color;
 
@@ -14,12 +14,11 @@ public class PowerUp extends GraphicalObject {
         this.type = type;
         this.width = 20;
         this.height = 20;
-
-        switch (type) {
-            case 1 -> color = Color.GREEN;
-            case 2 -> color = Color.BLUE;
-            default -> color = Color.GRAY;
-        }
+        this.color = switch (type) {
+            case 1 -> Color.GREEN;
+            case 2 -> Color.BLUE;
+            default -> Color.GRAY;
+        };
     }
 
     @Override
@@ -28,9 +27,7 @@ public class PowerUp extends GraphicalObject {
         g.fillRect((int)x, (int)y, (int)width, (int)height);
     }
 
-    public int getType() {
-        return type;
-    }
+    public int getType() { return type; }
 
     public boolean collidesWith(Player p) {
         double dx = x - p.getX();

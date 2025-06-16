@@ -1,10 +1,10 @@
+// Enemy.java
 package my_project.model;
 
 import KAGO_framework.model.GraphicalObject;
 import java.awt.*;
 
 public class Enemy extends GraphicalObject {
-
     private double speed = 100;
     private int type;
 
@@ -32,11 +32,6 @@ public class Enemy extends GraphicalObject {
         g.fillOval((int)x, (int)y, (int)width, (int)height);
     }
 
-    public boolean isOffScreen() {
-        return y > 1000;
-    }
-
-    public int getType() {
-        return type;
-    }
+    public boolean isOffScreen() { return y > 1000; }
+    public int getType() { return type; }
 }
